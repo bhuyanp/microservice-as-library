@@ -1,11 +1,22 @@
-type Product{
-    id:String!
-    title:String
+input ProductRequest{
+    title:String!
     description:String
+    price:String!
 }
 
+type ProductResponse{
+    id:String!
+    title:String!
+    description:String
+    price:String!
+}
 
 type Query{
-    allProducts:[Product]
-    productById(productId:String):Product
+    allProducts:[ProductResponse]
+    productById(productId:String):ProductResponse
+}
+
+type Mutation{
+    addProduct(productRequest:ProductRequest):ProductResponse
+    deleteProductById(productId:String):String
 }

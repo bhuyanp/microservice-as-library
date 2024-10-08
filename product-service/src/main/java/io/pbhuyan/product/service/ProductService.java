@@ -4,6 +4,7 @@ import io.pbhuyan.product.entity.Product;
 import io.pbhuyan.product.exception.InvalidProductException;
 import io.pbhuyan.product.exception.ProductNotFoundException;
 import io.pbhuyan.product.repo.ProductRepo;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class ProductService {
         return productRepo.findById(productId).orElseThrow(() ->
                 new ProductNotFoundException("Not able to find any product with id " + productId));
     }
-    public Product add(final Product product) {
+    public Product add(@NotNull final Product product) {
         validateProduct(product);
         return productRepo.save(product);
     }
@@ -40,6 +41,7 @@ public class ProductService {
     }
 
     public void delete(final String productId) {
+        getById(productId);
         productRepo.deleteById(productId);
     }
 }

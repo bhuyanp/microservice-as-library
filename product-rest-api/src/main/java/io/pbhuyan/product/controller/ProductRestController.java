@@ -1,6 +1,7 @@
 package io.pbhuyan.product.controller;
 
 import io.pbhuyan.product.dto.ProductRequestDto;
+import io.pbhuyan.product.dto.ProductResponseDto;
 import io.pbhuyan.product.entity.Product;
 import io.pbhuyan.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -18,23 +19,22 @@ public class ProductRestController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts()
+                .stream().map(ProductResponseDto::new).toList());
     }
 
 
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable String productId) {
-        return ResponseEntity.ok(productService.getById(productId));
+    public ResponseEntity<ProductResponseDto> getProductById(@PathVariable String productId) {
+        Product productById = productService.getById(productId);
+        return ResponseEntity.ok(new ProductResponseDto(productById));
     }
 
     @PostMapping
-    public ResponseEntity<Product> getProductById(@RequestBody @Valid ProductRequestDto productDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.add(Product.builder()
-                        .title(productDto.getTitle())
-                        .description(productDto.getDescription())
-                        .price(productDto.getPrice())
-                .build()));
+    public ResponseEntity<ProductResponseDto> getProductById(@RequestBody @Valid ProductRequestDto productDto) {
+        Product newlyAddedProduct = productService.add(productDto.getProductEntity());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponseDto(newlyAddedProduct));
     }
 
     @DeleteMapping("/{productId}")
