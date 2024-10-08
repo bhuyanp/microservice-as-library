@@ -11,13 +11,14 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class ProductRequestDto {
+public class ProductRequest {
     @NotBlank(message = "Product title is required")
     private String title;
     private String description;
     @Positive(message = "Price must be a positive value")
     @NotNull(message = "Product price is required")
     private BigDecimal price;
+
 
     public Product getProductEntity() {
         return Product.builder()
