@@ -12,11 +12,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static io.pbhuyan.product.controller.ProductRestController.PRODUCT_SERVICE_BASE_URI;
+
 @RestController
-@RequestMapping("/api/rest/products")
+@RequestMapping(PRODUCT_SERVICE_BASE_URI)
 @RequiredArgsConstructor
 public class ProductRestController {
     private final ProductService productService;
+
+    public static final String PRODUCT_SERVICE_BASE_URI = "/api/v1/rest/products";
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
@@ -42,6 +46,4 @@ public class ProductRestController {
         productService.delete(productId);
         return ResponseEntity.ok("Product successfully deleted");
     }
-
-
 }
