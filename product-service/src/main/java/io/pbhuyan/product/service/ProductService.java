@@ -4,6 +4,7 @@ import io.pbhuyan.product.entity.Product;
 import io.pbhuyan.product.exception.InvalidProductException;
 import io.pbhuyan.product.exception.ProductNotFoundException;
 import io.pbhuyan.product.repo.ProductRepo;
+import io.pbhuyan.security.common.constant.ROLE;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -20,18 +21,18 @@ public class ProductService {
     private final ProductRepo productRepo;
     private final Validator validator;
 
-    @Secured("ROLE_USER")
+    @Secured(ROLE.GA_USER)
     public List<Product> getAllProducts() {
         return productRepo.findAll();
     }
 
-    @Secured("ROLE_USER")
+    @Secured(ROLE.GA_USER)
     public Product getById(final String productId) {
         return productRepo.findById(productId).orElseThrow(() ->
                 new ProductNotFoundException("Not able to find any product with id " + productId));
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured(ROLE.GA_ADMIN)
     public Product add(@NotNull final Product product) {
         validateProduct(product);
         return productRepo.save(product);
@@ -46,7 +47,7 @@ public class ProductService {
     }
 
 
-    @Secured("ROLE_ADMIN")
+    @Secured(ROLE.GA_ADMIN)
     public void delete(final String productId) {
         getById(productId);
         productRepo.deleteById(productId);
