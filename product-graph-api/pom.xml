@@ -43,6 +43,11 @@
 			<artifactId>product-service</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>io.pbhuyan</groupId>
+			<artifactId>app-security-common</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>

@@ -40,8 +40,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws jakarta.servlet.ServletException, IOException {
 
-        log.info("doFilterInternal: {}", request.getRequestURI());
-        log.info("doFilterInternal: {}", request.toString());
+        log.info("Request: {}:{}", request.getMethod(),request.getRequestURI());
         String token = getJWTFromRequest(request);
 
         log.info("doFilterInternal: {}", token);
