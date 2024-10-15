@@ -17,8 +17,6 @@ import static io.pbhuyan.security.common.controller.AuthenticationController.AUT
 public class ProductSecurityConfig {
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final AuthEntryPoint authEntryPoint;
-
-
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
@@ -36,5 +34,4 @@ public class ProductSecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
 }
