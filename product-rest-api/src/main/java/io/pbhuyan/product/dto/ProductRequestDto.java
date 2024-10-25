@@ -19,7 +19,7 @@ public class ProductRequestDto {
     @NotNull(message = "Product price is required")
     private BigDecimal price;
 
-    public Product getProductEntity() {
+    public Product productEntity() {
         return Product.builder()
                 .title(getTitle())
                 .description(getDescription())

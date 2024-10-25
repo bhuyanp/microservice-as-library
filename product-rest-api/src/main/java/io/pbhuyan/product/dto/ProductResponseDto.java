@@ -1,21 +1,21 @@
 package io.pbhuyan.product.dto;
 
 import io.pbhuyan.product.entity.Product;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-public class ProductResponseDto extends ProductRequestDto {
+@Data
+@NoArgsConstructor
+public class ProductResponseDto {
     private String id;
+    private String title;
+    private String description;
+    private BigDecimal price;
 
     public ProductResponseDto(Product product){
-        this.id = product.getId();
+        setId(product.getId());
         setTitle(product.getTitle());
         setDescription(product.getDescription());
         setPrice(product.getPrice());

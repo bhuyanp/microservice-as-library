@@ -7,6 +7,7 @@ import io.pbhuyan.product.repo.ProductRepo;
 import io.pbhuyan.security.common.constant.ROLE;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.validation.Validator;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -23,7 +25,9 @@ public class ProductService {
 
     @Secured(ROLE.GA_USER)
     public List<Product> getAllProducts() {
-        return productRepo.findAll();
+        List<Product> all = productRepo.findAll();
+        log.info("Products: {}", all);
+        return all;
     }
 
     @Secured(ROLE.GA_USER)

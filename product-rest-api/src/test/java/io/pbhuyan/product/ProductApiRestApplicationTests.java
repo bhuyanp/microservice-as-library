@@ -1,12 +1,17 @@
 package io.pbhuyan.product;
 
+import io.pbhuyan.product.dto.ProductResponseDto;
 import io.pbhuyan.product.entity.Product;
+import io.pbhuyan.security.common.dto.AuthenticationResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -18,9 +23,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import static io.pbhuyan.product.controller.ProductRestController.PRODUCT_SERVICE_BASE_URI;
+import static io.pbhuyan.security.common.controller.AuthenticationController.AUTH_API_BASE_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:insert_products.sql")
@@ -34,7 +42,7 @@ class ProductApiRestApplicationTests {
 
 
     @DynamicPropertySource
-    static void neo4jProperties(DynamicPropertyRegistry registry) {
+    static void mysqlProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.product.url", mySQLContainer::getJdbcUrl);
         registry.add("spring.datasource.product.username", mySQLContainer::getUsername);
         registry.add("spring.datasource.product.password", mySQLContainer::getPassword);
@@ -49,6 +57,7 @@ class ProductApiRestApplicationTests {
     static void setUp() {
         assertTrue(mySQLContainer.isCreated());
         assertTrue(mySQLContainer.isRunning());
+
     }
 
 
@@ -56,7 +65,42 @@ class ProductApiRestApplicationTests {
     void beforeEach() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = serverPort;
+    }
 
+    private Response post(String request) {
+        return RestAssured
+                .given()
+                .headers("Authorization", "Bearer " + getAdminToken())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .post(PRODUCT_SERVICE_BASE_URI);
+    }
+
+    private Response get(String url) {
+        log.info("Get URL: {}", url);
+        return RestAssured
+                .given()
+                .headers("Authorization", "Bearer " + getAdminToken())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .get(url);
+    }
+
+    private String getAdminToken() {
+        ResponseBody<?> body = RestAssured.given()
+                .headers(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body("""
+                        {
+                            "username":"admin",
+                            "password":"admin1"
+                        }
+                        """)
+                .post(AUTH_API_BASE_URI + "/login")
+                .body();
+        log.info("body: {}", body.prettyPrint());
+        String token = body.as(AuthenticationResponse.class).token();
+        log.info("Token: {}", token);
+        return token;
     }
 
     @AfterEach
@@ -65,6 +109,7 @@ class ProductApiRestApplicationTests {
 
     @Test
     void shouldCreateProduct() {
+        //given
         String request = """
                 {
                     "title":"Product A",
@@ -72,7 +117,6 @@ class ProductApiRestApplicationTests {
                     "price":100.02
                 }
                 """;
-
         post(request)
                 .then()
                 .statusCode(201)
@@ -81,13 +125,6 @@ class ProductApiRestApplicationTests {
                 .body("description", Matchers.equalTo("Product A Description"));
     }
 
-    private static Response post(String request) {
-        return RestAssured
-                .given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .post("/api/rest/products");
-    }
 
     @Test
     void whenPriceMissing_shouldReturn400() {
@@ -132,26 +169,18 @@ class ProductApiRestApplicationTests {
 
     @Test
     void shouldReturnAllProducts() {
-        Product[] products = RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when()
-                .get("/api/rest/products")
+        ProductResponseDto[] productResponseDtos = get(PRODUCT_SERVICE_BASE_URI)
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(Product[].class);
-        Arrays.stream(products).forEach(System.out::println);
-        assertThat(products).hasSizeGreaterThanOrEqualTo(2);
+                .as(ProductResponseDto[].class);
+        Arrays.stream(productResponseDtos).forEach(System.out::println);
+        assertThat(productResponseDtos).hasSizeGreaterThanOrEqualTo(2);
     }
 
     @Test
     void shouldReturnProductById() {
-        RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when()
-                .get("/api/rest/products/" + PRODUCT.getId())
+        get(PRODUCT_SERVICE_BASE_URI + "/" + PRODUCT.getId())
                 .then()
                 .statusCode(200)
                 .body("id", Matchers.is(PRODUCT.getId()))
@@ -161,11 +190,7 @@ class ProductApiRestApplicationTests {
 
     @Test
     void shouldNotReturnMissingProduct() {
-        RestAssured
-                .given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when()
-                .get("/api/rest/products/" + "PRODUCT.getId()")
+        get(PRODUCT_SERVICE_BASE_URI + "PRODUCT.getId()")
                 .then()
                 .statusCode(404);
     }
@@ -174,9 +199,10 @@ class ProductApiRestApplicationTests {
     void shouldDeleteProductById() {
         RestAssured
                 .given()
+                .headers("Authorization", "Bearer " + getAdminToken())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when()
-                .delete("/api/rest/products/" + PRODUCT.getId())
+                .delete(PRODUCT_SERVICE_BASE_URI + "/" + PRODUCT.getId())
                 .then()
                 .statusCode(200);
     }

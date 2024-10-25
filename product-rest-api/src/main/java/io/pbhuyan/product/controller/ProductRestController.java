@@ -37,7 +37,7 @@ public class ProductRestController {
 
     @PostMapping
     public ResponseEntity<ProductResponseDto> getProductById(@RequestBody @Valid ProductRequestDto productDto) {
-        Product newlyAddedProduct = productService.add(productDto.getProductEntity());
+        Product newlyAddedProduct = productService.add(productDto.productEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponseDto(newlyAddedProduct));
     }
 

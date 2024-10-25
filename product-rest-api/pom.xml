@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>io.pbhuyan</groupId>
 	<artifactId>product-rest-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>product-api-rest</name>
-	<description>Demo project for Spring Boot</description>
+	<version>1.0.0</version>
+	<name>Product Rest API</name>
+	<description>Product Rest API</description>
 	<url/>
 	<licenses>
 		<license/>
